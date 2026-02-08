@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Midnight Readiness V1</title>
+    <title>Midnight Readiness V2</title>
     <style>
         :root {
             --bg-color: #1a1a1d; --panel-bg: #2d2d33; --text-color: #ffffff;
-            --theme-color: #9b59b6; --theme-glow: rgba(155, 89, 182, 0.4);
+            --theme-color: #C41F3B; --theme-glow: rgba(196, 31, 59, 0.4);
             --accent-valor: #d63031; --accent-crests: #e1b12c;
             --r-none: #444; --r-veteran: #0070dd; --r-champion: #a335ee; 
             --r-hero: #00ff96; --r-myth: #ff8000; --r-crafted: #f1c40f; 
             --c-weathered: #b2bec3; --c-carved: #55efc4; --c-runed: #0984e3; --c-gilded: #fdcb6e;
         }
-
         [data-theme="DK"] { --theme-color: #C41F3B; --theme-glow: rgba(196, 31, 59, 0.4); }
         [data-theme="DH"] { --theme-color: #A330C9; --theme-glow: rgba(163, 48, 201, 0.4); }
         [data-theme="Druid"] { --theme-color: #FF7D0A; --theme-glow: rgba(255, 125, 10, 0.4); }
@@ -62,18 +61,11 @@
         .level-select { width: 50px; }
         .crafted-input { width: 50px; background: #444; border: 1px solid #f1c40f; color: #f1c40f; padding: 4px; border-radius: 4px; font-weight: bold; text-align: center; display: none; margin-left: 5px; font-size:0.8rem;}
         .item-ilvl { width: 35px; text-align: right; font-size: 0.8rem; color: #fff; font-weight: bold; margin-left: 5px; }
-        .gear-slot[data-rarity="None"] { border-left-color: var(--r-none); opacity: 0.5; }
-        .gear-slot[data-rarity="Veteran"] { border-left-color: var(--r-veteran); }
-        .gear-slot[data-rarity="Champion"] { border-left-color: var(--r-champion); }
-        .gear-slot[data-rarity="Hero"] { border-left-color: var(--r-hero); }
-        .gear-slot[data-rarity="Myth"] { border-left-color: var(--r-myth); box-shadow: 0 0 10px rgba(255, 128, 0, 0.1); }
-        .gear-slot[data-rarity="Crafted"] { border-left-color: var(--r-crafted); }
 
         .tab-nav { display: flex; border-bottom: 1px solid #444; margin-bottom: 15px; flex-shrink: 0;}
         .tab-btn { flex: 1; padding: 8px; background: none; border: none; color: #888; cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent; font-size:0.9rem;}
         .tab-btn.active { color: white; border-bottom-color: var(--theme-color); }
         
-        /* SUB TABS */
         .sub-nav { display: flex; gap: 10px; margin-bottom: 15px; }
         .sub-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #444; color: #888; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
         .sub-btn.active { background: var(--theme-color); color: #1a1a1d; font-weight: bold; border-color: var(--theme-color); }
@@ -85,6 +77,12 @@
         .strategy-box { background: #202024; padding: 10px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #444; text-align: left; }
         .strategy-label { display: block; font-size: 0.7rem; color: #aaa; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px; }
         .strategy-select { width: 100%; padding: 8px; background: #333; border: 1px solid #555; color: white; border-radius: 6px; font-size:0.9rem;}
+        
+        .bonus-box { background: #2d2d33; padding: 12px; border-radius: 8px; border: 1px solid var(--theme-color); margin-bottom: 15px; display: none; }
+        .bonus-item { display: flex; justify-content: space-between; align-items: center; }
+        .bonus-label { font-size: 0.85rem; color: #fff; }
+        .bonus-check { transform: scale(1.3); cursor: pointer; }
+
         .planner { background: #26262b; padding: 10px; border-radius: 12px; border: 1px solid #3a3a40; margin-bottom: 15px; }
         .planner-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 8px; }
         .planner-val { font-weight: bold; font-size: 1.1rem; color: #fff; }
@@ -156,6 +154,14 @@
                         <span id="conversionDisplay" style="text-align: right; color: #aaa;"></span>
                     </div>
                 </div>
+
+                <div id="weeklyBonusPanel" class="bonus-box">
+                    <div class="bonus-item">
+                        <span class="bonus-label">Commit to Weekly T11 Map + 3 Stashes (+41 Gilded/reset)</span>
+                        <input type="checkbox" id="bonusCheck" class="bonus-check" onchange="updateBonus()">
+                    </div>
+                </div>
+
                 <div style="text-align:center;">
                     <div class="counter-display" id="runsRemaining">0</div>
                     <div class="sub-text">Runs Remaining</div>
@@ -176,13 +182,13 @@
                 <div class="stats-grid">
                     <div class="stat-box valor-box">
                         <span class="stat-label">Valor Goal</span>
-                        <input type="number" class="stat-input" id="valorGoalInput" value="3436" onchange="updateGoals()">
+                        <input type="number" class="stat-input" id="valorGoalInput" value="4570" onchange="updateGoals()">
                         <div class="stat-label" style="margin-top:2px;">Rem: <span id="valorReal">0</span></div>
                         <div class="progress-container"><div class="progress-bar" id="valorBar" style="background: var(--accent-valor); width: 0%"></div></div>
                     </div>
                     <div class="stat-box crest-box">
                         <span class="stat-label">Gilded Goal</span>
-                        <input type="number" class="stat-input" id="crestGoalInput" value="390" onchange="updateGoals()">
+                        <input type="number" class="stat-input" id="crestGoalInput" value="465" onchange="updateGoals()">
                         <div class="stat-label" style="margin-top:2px;">Rem: <span id="crestReal">0</span></div>
                         <div class="progress-container"><div class="progress-bar" id="crestBar" style="background: var(--accent-crests); width: 0%"></div></div>
                     </div>
@@ -194,7 +200,6 @@
                     <button id="btn-cfg-delves" class="sub-btn active" onclick="switchConfigSub('delves')">Delves</button>
                     <button id="btn-cfg-dungeons" class="sub-btn" onclick="switchConfigSub('dungeons')">Dungeons</button>
                 </div>
-
                 <div id="cfg-delves" class="cfg-container active">
                     <div class="settings-scroll" style="flex:1;">
                         <table class="settings-table">
@@ -203,7 +208,6 @@
                         </table>
                     </div>
                 </div>
-
                 <div id="cfg-dungeons" class="cfg-container">
                     <div class="settings-scroll" style="flex:1;">
                         <table class="settings-table">
@@ -212,7 +216,6 @@
                         </table>
                     </div>
                 </div>
-
                 <button class="btn-undo" style="width:100%; margin-top:15px; color:#d63031; border-color:#d63031; padding:10px;" onclick="resetDefaults()">Reset Config to Defaults</button>
             </div>
         </div>
@@ -243,19 +246,18 @@
     const ILVL_RANGES = { 'None': [0, 0], 'Veteran': [108, 131], 'Champion': [121, 144], 'Hero': [134, 157], 'Myth': [147, 160], 'Crafted': [0, 0] };
     const CONVERSION = { 'Gilded': 1, 'Runed': 1/3, 'Carved': 1/9, 'Weathered': 1/27 };
     
-    // UPDATED CONFIG WITH TABBED DATA
-const DEFAULT_CONFIG = {
+    const DEFAULT_CONFIG = {
         delves: [
-            { id: 'd1', name: 'Tier 1', valor: 15, type: 'Weathered', amt: 2 },
-            { id: 'd2', name: 'Tier 2', valor: 20, type: 'Weathered', amt: 4 },
-            { id: 'd3', name: 'Tier 3', valor: 25, type: 'Weathered', amt: 6 },
-            { id: 'd4', name: 'Tier 4', valor: 30, type: 'Carved', amt: 2 },
-            { id: 'd5', name: 'Tier 5', valor: 35, type: 'Carved', amt: 4 },
-            { id: 'd6', name: 'Tier 6', valor: 40, type: 'Runed', amt: 2 },
-            { id: 'd7', name: 'Tier 7', valor: 50, type: 'Gilded', amt: 4 },
-            { id: 'd8', name: 'Tier 8', valor: 65, type: 'Gilded', amt: 5 },
-            { id: 'd9', name: 'Tier 9', valor: 65, type: 'Runed', amt: 5 },
-            { id: 'd10', name: 'Tier 10', valor: 65, type: 'Runed', amt: 5 },
+            { id: 'd1', name: 'Tier 1', valor: 8, type: 'Weathered', amt: 8 },
+            { id: 'd2', name: 'Tier 2', valor: 12, type: 'Weathered', amt: 12 },
+            { id: 'd3', name: 'Tier 3', valor: 14, type: 'Weathered', amt: 16 },
+            { id: 'd4', name: 'Tier 4', valor: 16, type: 'Weathered', amt: 20 },
+            { id: 'd5', name: 'Tier 5', valor: 18, type: 'Weathered', amt: 24 },
+            { id: 'd6', name: 'Tier 6', valor: 25, type: 'Carved', amt: 12 },
+            { id: 'd7', name: 'Tier 7', valor: 32, type: 'Carved', amt: 20 },
+            { id: 'd8', name: 'Tier 8', valor: 40, type: 'Runed', amt: 8 },
+            { id: 'd9', name: 'Tier 9', valor: 48, type: 'Runed', amt: 10 },
+            { id: 'd10', name: 'Tier 10', valor: 57, type: 'Runed', amt: 12 },
             { id: 'd11', name: 'Tier 11', valor: 65, type: 'Runed', amt: 15 }
         ],
         dungeons: [
@@ -278,24 +280,14 @@ const DEFAULT_CONFIG = {
 
     window.onload = function() {
         if(localStorage.getItem('dt_config')) config = JSON.parse(localStorage.getItem('dt_config'));
-        
         if(localStorage.getItem('dt_profiles')) {
             profiles = JSON.parse(localStorage.getItem('dt_profiles'));
-            profiles.forEach(p => {
-                if(!p.gear) p.gear = {};
-                SLOTS.forEach(s => {
-                    if(!p.gear[s] || typeof p.gear[s] !== 'object') p.gear[s] = { tier: 'Veteran', level: '1/8', customIlvl: 150 };
-                });
-            });
         } else {
-            profiles = [{ id: Date.now(), name: "Main Character", class: "Void", gear: {}, runsDone: 0, valorGoal: 3436, crestGoal: 390, activeRunId: 'd8', targetDate: "2026-03-02" }];
+            profiles = [{ id: Date.now(), name: "Main Character", class: "DK", gear: {}, runsDone: 0, valorGoal: 4570, crestGoal: 465, activeRunId: 'd11', targetDate: "2026-03-02", weeklyBonusDone: false }];
             saveProfiles();
         }
-
         activeProfileId = profiles[0].id;
         if(localStorage.getItem('dt_activeId')) activeProfileId = parseInt(localStorage.getItem('dt_activeId'));
-        if(!profiles.find(p => p.id === activeProfileId)) activeProfileId = profiles[0].id;
-
         updateProfileSelect();
         renderSettings();
         populateDropdown(); 
@@ -304,12 +296,7 @@ const DEFAULT_CONFIG = {
 
     function getActiveProfile() { return profiles.find(p => p.id === activeProfileId); }
     function saveProfiles() { localStorage.setItem('dt_profiles', JSON.stringify(profiles)); localStorage.setItem('dt_activeId', activeProfileId); }
-
-    function switchProfile(id) {
-        activeProfileId = parseInt(id);
-        saveProfiles();
-        loadProfile(activeProfileId);
-    }
+    function switchProfile(id) { activeProfileId = parseInt(id); saveProfiles(); loadProfile(activeProfileId); }
 
     function loadProfile(id) {
         const p = profiles.find(p => p.id === id);
@@ -318,6 +305,7 @@ const DEFAULT_CONFIG = {
         document.getElementById('valorGoalInput').value = p.valorGoal;
         document.getElementById('crestGoalInput').value = p.crestGoal;
         document.getElementById('targetDate').value = p.targetDate || "2026-03-02";
+        document.getElementById('bonusCheck').checked = p.weeklyBonusDone || false;
         const runSelect = document.getElementById('activeRunSelect');
         if(p.activeRunId) runSelect.value = p.activeRunId;
         renderGearGrid(p.gear);
@@ -325,20 +313,20 @@ const DEFAULT_CONFIG = {
         render();
     }
 
-    function saveCharName() {
+    function updateBonus() {
         const p = getActiveProfile();
-        p.name = document.getElementById('charName').value;
+        p.weeklyBonusDone = document.getElementById('bonusCheck').checked;
         saveProfiles();
-        updateProfileSelect();
+        render();
     }
 
+    function saveCharName() { const p = getActiveProfile(); p.name = document.getElementById('charName').value; saveProfiles(); updateProfileSelect(); }
     function updateProfileSelect() {
         const sel = document.getElementById('profileSelect');
         sel.innerHTML = '';
         profiles.forEach(p => {
             const opt = document.createElement('option');
-            opt.value = p.id;
-            opt.text = `${p.name} (${p.class})`;
+            opt.value = p.id; opt.text = `${p.name} (${p.class})`;
             if(p.id === activeProfileId) opt.selected = true;
             sel.appendChild(opt);
         });
@@ -347,37 +335,26 @@ const DEFAULT_CONFIG = {
     function createProfile() {
         const name = document.getElementById('newCharName').value || "New Character";
         const cls = document.getElementById('newCharClass').value;
-        const newP = { id: Date.now(), name: name, class: cls, gear: {}, runsDone: 0, valorGoal: 3436, crestGoal: 390, activeRunId: 'd8', targetDate: "2026-03-02" };
-        profiles.push(newP);
-        activeProfileId = newP.id;
-        saveProfiles();
-        updateProfileSelect();
-        closeModal();
-        loadProfile(activeProfileId);
+        const newP = { id: Date.now(), name: name, class: cls, gear: {}, runsDone: 0, valorGoal: 4570, crestGoal: 465, activeRunId: 'd11', targetDate: "2026-03-02", weeklyBonusDone: false };
+        profiles.push(newP); activeProfileId = newP.id;
+        saveProfiles(); updateProfileSelect(); closeModal(); loadProfile(activeProfileId);
     }
 
     function deleteProfile() {
         if(profiles.length <= 1) { alert("Cannot delete the last profile."); return; }
-        if(confirm("Delete this character? This cannot be undone.")) {
+        if(confirm("Delete this character?")) {
             profiles = profiles.filter(p => p.id !== activeProfileId);
-            activeProfileId = profiles[0].id;
-            saveProfiles();
-            updateProfileSelect();
-            loadProfile(activeProfileId);
+            activeProfileId = profiles[0].id; saveProfiles(); updateProfileSelect(); loadProfile(activeProfileId);
         }
     }
 
-    function applyClassTheme(cls) {
-        if(cls === "Void") document.documentElement.removeAttribute('data-theme');
-        else document.documentElement.setAttribute('data-theme', cls);
-    }
+    function applyClassTheme(cls) { if(cls === "Void") document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', cls); }
 
     function getIlvl(tier, rankStr) {
         if(tier === 'None' || tier === 'Crafted') return 0;
-        const range = ILVL_RANGES[tier] || [0,0];
-        if (!rankStr) return range[0];
+        const range = ILVL_RANGES[tier];
         const parts = rankStr.split('/');
-        const rankIndex = parts.length > 0 ? (parseInt(parts[0]) - 1) : 0; 
+        const rankIndex = (parseInt(parts[0]) - 1); 
         const step = (range[1] - range[0]) / 7;
         return Math.round(range[0] + (step * rankIndex));
     }
@@ -386,17 +363,13 @@ const DEFAULT_CONFIG = {
         const grid = document.getElementById('gearGrid');
         grid.innerHTML = '';
         SLOTS.forEach(slot => {
-            let savedSlot = gearData[slot] || { tier: 'Veteran', level: '1/8', customIlvl: 150 };
-            
+            let savedSlot = gearData[slot] || { tier: 'Veteran', level: '1/8', customIlvl: 108 };
             const div = document.createElement('div');
             div.className = 'gear-slot';
             div.setAttribute('data-rarity', savedSlot.tier);
-            
             const isCrafted = savedSlot.tier === 'Crafted';
             const isNone = savedSlot.tier === 'None';
-            let displayIlvl = '-';
-            if(isCrafted) displayIlvl = savedSlot.customIlvl || 0;
-            else if(!isNone) displayIlvl = getIlvl(savedSlot.tier, savedSlot.level);
+            let displayIlvl = (isCrafted) ? (savedSlot.customIlvl || 0) : ((!isNone) ? getIlvl(savedSlot.tier, savedSlot.level) : '-');
 
             div.innerHTML = `
                 <span class="slot-label">${slot}</span>
@@ -415,140 +388,104 @@ const DEFAULT_CONFIG = {
 
     function updateSlot(slot, el, field) {
         const p = getActiveProfile();
-        if(!p.gear[slot]) p.gear[slot] = { tier: 'Veteran', level: '1/8', customIlvl: 150 };
+        if(!p.gear[slot]) p.gear[slot] = { tier: 'Veteran', level: '1/8', customIlvl: 108 };
         p.gear[slot][field] = el.value;
-        saveProfiles();
-        renderGearGrid(p.gear); 
-        calcAvgIlvl();
+        saveProfiles(); renderGearGrid(p.gear); calcAvgIlvl();
     }
 
     function calcAvgIlvl() {
         let total = 0, count = 0;
-        document.querySelectorAll('.item-ilvl').forEach(span => {
-            const val = span.innerText;
-            if(val !== '-') { total += parseInt(val); count++; }
-        });
+        document.querySelectorAll('.item-ilvl').forEach(span => { const val = span.innerText; if(val !== '-') { total += parseInt(val); count++; } });
         document.getElementById('avgIlvl').innerText = count > 0 ? (total/count).toFixed(1) : 0;
     }
 
     function render() {
         const p = getActiveProfile();
         p.activeRunId = document.getElementById('activeRunSelect').value;
-        saveProfiles();
-
-        let activeRun = config.delves.find(d => d.id === p.activeRunId);
-        if(!activeRun) activeRun = config.dungeons.find(d => d.id === p.activeRunId);
-        if(!activeRun) return; 
-
-        document.getElementById('infoValor').innerText = activeRun.valor;
-        const rate = CONVERSION[activeRun.type];
-        const effectiveGain = activeRun.amt * rate;
-        const displayDiv = document.getElementById('conversionDisplay');
-        if(activeRun.type === "Gilded") {
-            displayDiv.innerHTML = `Drops <span class="crest-gilded">${activeRun.amt} Gilded</span>`;
-        } else {
-            const approx = effectiveGain.toFixed(2).replace(/[.,]00$/, "");
-            displayDiv.innerHTML = `Drops <span class="crest-${activeRun.type.toLowerCase()}">${activeRun.type} ${activeRun.type}</span> (≈ <span class="crest-gilded">${approx} Gilded</span>)`;
-        }
-
-        const vpr = activeRun.valor || 99999;
-        const cpr = effectiveGain === 0 ? 0.0001 : effectiveGain;
-        const runsForValor = Math.ceil(p.valorGoal / vpr);
-        const runsForCrests = Math.ceil(p.crestGoal / cpr);
-        const startRuns = Math.max(runsForValor, runsForCrests);
-        
-        let remaining = startRuns - p.runsDone;
-        if(remaining < 0) remaining = 0;
-
-        document.getElementById('runsRemaining').innerText = remaining;
-
-        let valorReal = p.valorGoal - (p.runsDone * vpr);
-        if(valorReal < 0) valorReal = 0;
-        document.getElementById('valorReal').innerText = valorReal.toFixed(0);
-        document.getElementById('valorBar').style.width = ((p.valorGoal - valorReal)/p.valorGoal * 100) + "%";
-
-        let crestReal = p.crestGoal - (p.runsDone * effectiveGain);
-        if(crestReal < 0) crestReal = 0;
-        document.getElementById('crestReal').innerText = crestReal.toFixed(0);
-        document.getElementById('crestBar').style.width = ((p.crestGoal - crestReal)/p.crestGoal * 100) + "%";
-        
-        if(remaining === 0) document.getElementById('runsRemaining').style.color = "#00b894";
-        else document.getElementById('runsRemaining').style.removeProperty('color');
-
-        calculateWeekly(remaining);
-    }
-
-    function calculateWeekly(remaining) {
-        const p = getActiveProfile();
         p.targetDate = document.getElementById('targetDate').value;
         saveProfiles();
-        const diff = new Date(p.targetDate) - new Date();
-        let weeks = diff / (1000 * 60 * 60 * 24 * 7);
-        if(weeks < 0) weeks = 0;
-        const safeWeeks = Math.max(0.1, weeks);
+
+        // TIME CALCULATION
+        const now = new Date();
+        const target = new Date(p.targetDate);
+        const diffMs = target - now;
+        const weeks = Math.max(0.1, diffMs / (1000 * 60 * 60 * 24 * 7));
         document.getElementById('weeksLeft').innerText = weeks.toFixed(1);
-        document.getElementById('runsPerWeek').innerText = Math.ceil(remaining / safeWeeks);
-        document.getElementById('runsPerDay').innerText = (remaining / safeWeeks / 7).toFixed(1);
+
+        // CALCULATE NUMBER OF WEDNESDAY RESETS IN TIME PERIOD
+        let resetCycles = 0;
+        let checkDate = new Date(now);
+        while (checkDate < target) {
+            if (checkDate.getDay() === 3) resetCycles++; // 3 = Wednesday
+            checkDate.setDate(checkDate.getDate() + 1);
+        }
+        // Ensure at least 1 cycle if ticking the box today
+        if (resetCycles === 0 && p.weeklyBonusDone) resetCycles = 1;
+
+        const bonusPanel = document.getElementById('weeklyBonusPanel');
+        bonusPanel.style.display = (p.activeRunId === 'd11') ? 'block' : 'none';
+
+        let activeRun = config.delves.find(d => d.id === p.activeRunId) || config.dungeons.find(d => d.id === p.activeRunId);
+        if(!activeRun) return; 
+        
+        document.getElementById('infoValor').innerText = activeRun.valor;
+        const rate = CONVERSION[activeRun.type];
+        const baseEffectiveGain = activeRun.amt * rate;
+        
+        // TOTAL PROJECTED BONUS (41 per week left)
+        let totalProjectedBonus = (p.weeklyBonusDone && p.activeRunId === 'd11') ? (41 * resetCycles) : 0;
+
+        const displayDiv = document.getElementById('conversionDisplay');
+        displayDiv.innerHTML = (activeRun.type === "Gilded") ? `Drops <span class="crest-gilded">${activeRun.amt} Gilded</span>` : `Drops <span class="crest-${activeRun.type.toLowerCase()}">${activeRun.amt} ${activeRun.type}</span> (≈ <span class="crest-gilded">${baseEffectiveGain.toFixed(2)} Gilded</span>)`;
+        
+        // DYNAMIC REMAINING GOALS
+        const currentGildedRem = Math.max(0, p.crestGoal - totalProjectedBonus - (p.runsDone * baseEffectiveGain));
+        const currentValorRem = Math.max(0, p.valorGoal - (p.runsDone * activeRun.valor));
+
+        const runsForValor = Math.ceil(currentValorRem / activeRun.valor);
+        const runsForCrests = Math.ceil(currentGildedRem / (baseEffectiveGain || 0.001));
+        const totalRunsRemaining = Math.max(runsForValor, runsForCrests);
+        
+        document.getElementById('runsRemaining').innerText = totalRunsRemaining;
+        document.getElementById('valorReal').innerText = currentValorRem;
+        document.getElementById('crestReal').innerText = currentGildedRem.toFixed(0);
+        
+        document.getElementById('runsPerWeek').innerText = Math.ceil(totalRunsRemaining / weeks);
+        document.getElementById('runsPerDay').innerText = (totalRunsRemaining / weeks / 7).toFixed(1);
     }
 
-    function updateRuns(amt) {
-        const p = getActiveProfile();
-        p.runsDone += amt;
-        if(p.runsDone < 0) p.runsDone = 0;
-        saveProfiles();
-        render();
-    }
-
-    function updateGoals() {
-        const p = getActiveProfile();
-        p.valorGoal = parseInt(document.getElementById('valorGoalInput').value) || 0;
-        p.crestGoal = parseInt(document.getElementById('crestGoalInput').value) || 0;
-        saveProfiles();
-        render();
-    }
+    function updateRuns(amt) { const p = getActiveProfile(); p.runsDone = Math.max(0, p.runsDone + amt); saveProfiles(); render(); }
+    function updateGoals() { const p = getActiveProfile(); p.valorGoal = parseInt(document.getElementById('valorGoalInput').value); p.crestGoal = parseInt(document.getElementById('crestGoalInput').value); saveProfiles(); render(); }
 
     function renderSettings() {
-        const dBody = document.getElementById('delveSettingsBody');
-        const mBody = document.getElementById('dungeonSettingsBody');
-        dBody.innerHTML = ''; mBody.innerHTML = '';
         const buildRow = (item, cat, idx) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `<td style="color:var(--theme-color)">${item.name}</td>
-            <td><input type="number" value="${item.valor}" onchange="updateConfig('${cat}', ${idx}, 'valor', this.value)"></td>`;
-            const types = ['Gilded', 'Runed', 'Carved', 'Weathered'];
-            let opts = types.map(t => `<option value="${t}" ${item.type === t ? 'selected' : ''}>${t}</option>`).join('');
-            tr.innerHTML += `<td><select onchange="updateConfig('${cat}', ${idx}, 'type', this.value)">${opts}</select></td>
+            <td><input type="number" value="${item.valor}" onchange="updateConfig('${cat}', ${idx}, 'valor', this.value)"></td>
+            <td><select onchange="updateConfig('${cat}', ${idx}, 'type', this.value)">${['Gilded', 'Runed', 'Carved', 'Weathered'].map(t => `<option value="${t}" ${item.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></td>
             <td><input type="number" value="${item.amt}" onchange="updateConfig('${cat}', ${idx}, 'amt', this.value)"></td>`;
             return tr;
         };
-        config.delves.forEach((item, idx) => dBody.appendChild(buildRow(item, 'delves', idx)));
-        config.dungeons.forEach((item, idx) => mBody.appendChild(buildRow(item, 'dungeons', idx)));
+        document.getElementById('delveSettingsBody').innerHTML = ''; document.getElementById('dungeonSettingsBody').innerHTML = '';
+        config.delves.forEach((item, idx) => document.getElementById('delveSettingsBody').appendChild(buildRow(item, 'delves', idx)));
+        config.dungeons.forEach((item, idx) => document.getElementById('dungeonSettingsBody').appendChild(buildRow(item, 'dungeons', idx)));
     }
 
     function updateConfig(cat, idx, key, val) {
-        if(key === 'valor' || key === 'amt') val = parseInt(val) || 0;
-        config[cat][idx][key] = val;
+        config[cat][idx][key] = (key === 'valor' || key === 'amt') ? parseInt(val) : val;
         localStorage.setItem('dt_config', JSON.stringify(config));
-        populateDropdown();
-        render();
+        populateDropdown(); render();
     }
 
     function populateDropdown() {
         const select = document.getElementById('activeRunSelect');
-        const currentVal = select.value;
-        select.innerHTML = '';
+        const currentVal = select.value; select.innerHTML = '';
         const addOpts = (list, label) => {
             const grp = document.createElement('optgroup'); grp.label = label;
-            list.forEach(item => {
-                const opt = document.createElement('option');
-                opt.value = item.id;
-                opt.text = item.name;
-                grp.appendChild(opt);
-            });
+            list.forEach(item => { const opt = document.createElement('option'); opt.value = item.id; opt.text = item.name; grp.appendChild(opt); });
             select.appendChild(grp);
         };
-        addOpts(config.delves, "Delves");
-        addOpts(config.dungeons, "Mythic Dungeons");
+        addOpts(config.delves, "Delves"); addOpts(config.dungeons, "Mythic Dungeons");
         if(currentVal) select.value = currentVal;
     }
 
@@ -556,9 +493,7 @@ const DEFAULT_CONFIG = {
         if(confirm("Reset GLOBAL settings to defaults?")) {
             config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
             localStorage.setItem('dt_config', JSON.stringify(config));
-            renderSettings();
-            populateDropdown();
-            render();
+            renderSettings(); populateDropdown(); render();
         }
     }
 
@@ -566,25 +501,18 @@ const DEFAULT_CONFIG = {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById('tab-' + tab).classList.add('active');
-        const buttons = document.querySelectorAll('.tab-btn');
-        if(tab === 'dashboard') buttons[0].classList.add('active'); else buttons[1].classList.add('active');
+        if(tab === 'dashboard') document.querySelectorAll('.tab-btn')[0].classList.add('active'); else document.querySelectorAll('.tab-btn')[1].classList.add('active');
     }
 
     function switchConfigSub(mode) {
-        document.getElementById('cfg-delves').classList.remove('active');
-        document.getElementById('cfg-dungeons').classList.remove('active');
-        document.getElementById('btn-cfg-delves').classList.remove('active');
-        document.getElementById('btn-cfg-dungeons').classList.remove('active');
-        document.getElementById('cfg-' + mode).classList.add('active');
-        document.getElementById('btn-cfg-' + mode).classList.add('active');
+        document.getElementById('cfg-delves').classList.toggle('active', mode === 'delves');
+        document.getElementById('cfg-dungeons').classList.toggle('active', mode === 'dungeons');
+        document.getElementById('btn-cfg-delves').classList.toggle('active', mode === 'delves');
+        document.getElementById('btn-cfg-dungeons').classList.toggle('active', mode === 'dungeons');
     }
 
     function openModal() { document.getElementById('newCharModal').style.display = 'block'; }
     function closeModal() { document.getElementById('newCharModal').style.display = 'none'; }
-    window.onclick = function(event) { if (event.target == document.getElementById('newCharModal')) closeModal(); }
 </script>
-
 </body>
 </html>
-
-
