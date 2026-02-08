@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midnight Readiness (1080p Dashboard)</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1d; --panel-bg: #2d2d33; --text-color: #ffffff;
+            --theme-color: #9b59b6; --theme-glow: rgba(155, 89, 182, 0.4);
+            --accent-valor: #d63031; --accent-crests: #e1b12c;
+            --r-none: #444; --r-veteran: #0070dd; --r-champion: #a335ee; 
+            --r-hero: #00ff96; --r-myth: #ff8000; --r-crafted: #f1c40f; 
+            --c-weathered: #b2bec3; --c-carved: #55efc4; --c-runed: #0984e3; --c-gilded: #fdcb6e;
+        }
+
+        [data-theme="DK"] { --theme-color: #C41F3B; --theme-glow: rgba(196, 31, 59, 0.4); }
+        [data-theme="DH"] { --theme-color: #A330C9; --theme-glow: rgba(163, 48, 201, 0.4); }
+        [data-theme="Druid"] { --theme-color: #FF7D0A; --theme-glow: rgba(255, 125, 10, 0.4); }
+        [data-theme="Evoker"] { --theme-color: #33937F; --theme-glow: rgba(51, 147, 127, 0.4); }
+        [data-theme="Hunter"] { --theme-color: #ABD473; --theme-glow: rgba(171, 212, 115, 0.4); }
+        [data-theme="Mage"] { --theme-color: #40C7EB; --theme-glow: rgba(64, 199, 235, 0.4); }
+        [data-theme="Monk"] { --theme-color: #00FF96; --theme-glow: rgba(0, 255, 150, 0.4); }
+        [data-theme="Paladin"] { --theme-color: #F58CBA; --theme-glow: rgba(245, 140, 186, 0.4); }
+        [data-theme="Priest"] { --theme-color: #FFFFFF; --theme-glow: rgba(255, 255, 255, 0.4); }
+        [data-theme="Rogue"] { --theme-color: #FFF569; --theme-glow: rgba(255, 245, 105, 0.4); }
+        [data-theme="Shaman"] { --theme-color: #0070DE; --theme-glow: rgba(0, 112, 222, 0.4); }
+        [data-theme="Warlock"] { --theme-color: #8787ED; --theme-glow: rgba(135, 135, 237, 0.4); }
+        [data-theme="Warrior"] { --theme-color: #C79C6E; --theme-glow: rgba(199, 156, 110, 0.4); }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color); color: var(--text-color);
+            margin: 0; padding: 15px; height: 100vh; width: 100vw;
+            overflow: hidden; display: flex; justify-content: center;
+        }
+        .main-container { width: 100%; max-width: 1400px; height: 100%; display: flex; flex-direction: column; gap: 15px; }
+        .profile-bar { background: var(--panel-bg); padding: 10px 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--theme-color); box-shadow: 0 5px 15px rgba(0,0,0,0.3); flex-shrink: 0; }
+        .app-wrapper { display: flex; gap: 20px; flex: 1; min-height: 0; }
+        .panel { background-color: var(--panel-bg); padding: 1.5rem; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); border-top: 4px solid var(--theme-color); height: 100%; display: flex; flex-direction: column; }
+        .char-panel { flex: 1; min-width: 340px; }
+        .tracker-panel { flex: 1.2; min-width: 320px; }
+        .gear-scroll-container { flex: 1; overflow-y: auto; padding-right: 5px; margin-top: 10px; }
+        .tab-content { display: none; height: 100%; flex-direction: column; }
+        .tab-content.active { display: flex; overflow-y: auto; padding-right: 5px; }
+        
+        .profile-select { padding: 8px; font-size: 0.9rem; background: #222; color: white; border: 1px solid #555; border-radius: 6px; min-width: 200px; }
+        .btn-profile { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-left: 10px; font-size: 0.85rem;}
+        .btn-new { background: var(--theme-color); color: #1a1a1d; }
+        .btn-del { background: #d63031; color: white; opacity: 0.7; }
+        .char-header { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; justify-content: space-between; flex-shrink: 0;}
+        .char-input { background: #222; border: 1px solid #444; color: var(--theme-color); padding: 8px; border-radius: 6px; font-size: 1.1rem; font-weight: bold; width: 60%; font-family: inherit; }
+        .ilvl-display { background: #202024; padding: 5px 10px; border-radius: 8px; border: 1px solid #444; text-align: center; }
+        .ilvl-number { font-size: 1.2rem; font-weight: bold; color: var(--theme-color); display: block; line-height: 1; }
+        .ilvl-label { font-size: 0.6rem; color: #888; text-transform: uppercase; }
+        .gear-grid { display: grid; gap: 6px; }
+        .gear-slot { display: flex; align-items: center; background: #26262b; padding: 6px; border-radius: 6px; border-left: 4px solid #444; }
+        .slot-label { width: 70px; font-size: 0.7rem; color: #aaa; text-transform: uppercase; font-weight: bold; }
+        .slot-select { background: #333; color: white; border: none; padding: 4px; border-radius: 4px; margin-left: 5px; font-size: 0.8rem; cursor: pointer; }
+        .tier-select { flex-grow: 1; }
+        .level-select { width: 50px; }
+        .crafted-input { width: 50px; background: #444; border: 1px solid #f1c40f; color: #f1c40f; padding: 4px; border-radius: 4px; font-weight: bold; text-align: center; display: none; margin-left: 5px; font-size:0.8rem;}
+        .item-ilvl { width: 35px; text-align: right; font-size: 0.8rem; color: #fff; font-weight: bold; margin-left: 5px; }
+        .gear-slot[data-rarity="None"] { border-left-color: var(--r-none); opacity: 0.5; }
+        .gear-slot[data-rarity="Veteran"] { border-left-color: var(--r-veteran); }
+        .gear-slot[data-rarity="Champion"] { border-left-color: var(--r-champion); }
+        .gear-slot[data-rarity="Hero"] { border-left-color: var(--r-hero); }
+        .gear-slot[data-rarity="Myth"] { border-left-color: var(--r-myth); box-shadow: 0 0 10px rgba(255, 128, 0, 0.1); }
+        .gear-slot[data-rarity="Crafted"] { border-left-color: var(--r-crafted); }
+
+        .tab-nav { display: flex; border-bottom: 1px solid #444; margin-bottom: 15px; flex-shrink: 0;}
+        .tab-btn { flex: 1; padding: 8px; background: none; border: none; color: #888; cursor: pointer; font-weight: bold; border-bottom: 3px solid transparent; font-size:0.9rem;}
+        .tab-btn.active { color: white; border-bottom-color: var(--theme-color); }
+        
+        /* SUB TABS */
+        .sub-nav { display: flex; gap: 10px; margin-bottom: 15px; }
+        .sub-btn { flex: 1; padding: 8px; background: #222; border: 1px solid #444; color: #888; border-radius: 6px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .sub-btn.active { background: var(--theme-color); color: #1a1a1d; font-weight: bold; border-color: var(--theme-color); }
+        .cfg-container { display: none; flex-direction: column; height: 100%; }
+        .cfg-container.active { display: flex; }
+
+        .counter-display { font-size: 3.5rem; font-weight: bold; margin: 5px 0; color: var(--theme-color); line-height: 1; text-shadow: 0 0 15px var(--theme-glow); }
+        .sub-text { color:#b2bec3; margin-bottom: 15px; font-size: 0.9rem; }
+        .strategy-box { background: #202024; padding: 10px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #444; text-align: left; }
+        .strategy-label { display: block; font-size: 0.7rem; color: #aaa; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px; }
+        .strategy-select { width: 100%; padding: 8px; background: #333; border: 1px solid #555; color: white; border-radius: 6px; font-size:0.9rem;}
+        .planner { background: #26262b; padding: 10px; border-radius: 12px; border: 1px solid #3a3a40; margin-bottom: 15px; }
+        .planner-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 8px; }
+        .planner-val { font-weight: bold; font-size: 1.1rem; color: #fff; }
+        .planner-sub { font-size: 0.65rem; color: #888; text-transform: uppercase; }
+        .pace-val { color: var(--theme-color); }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left; background: #222; padding: 10px; border-radius: 10px; margin-bottom: 15px; }
+        .stat-box { padding: 5px; display: flex; flex-direction: column; }
+        .stat-label { font-size: 0.65rem; color: #b2bec3; text-transform: uppercase; margin-bottom: 3px;}
+        .stat-input { font-size: 1.1rem; font-weight: bold; background: transparent; border: none; border-bottom: 1px dashed #555; color: #fff; width: 100%; }
+        .valor-box { border-left: 3px solid var(--accent-valor); padding-left: 8px; }
+        .crest-box { border-left: 3px solid var(--accent-crests); padding-left: 8px; }
+        .progress-container { margin-top: 4px; background: #444; height: 4px; border-radius: 3px; overflow: hidden; }
+        .progress-bar { height: 100%; transition: width 0.3s ease; }
+        .btn-add { background-color: var(--theme-color); color: #1a1a1d; width:100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-bottom: 8px;}
+        .btn-undo { background: transparent; color: #666; border: 1px solid #666; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; }
+        .crest-gilded { color: var(--c-gilded); font-weight: bold; }
+        .crest-runed { color: var(--c-runed); }
+        .crest-carved { color: var(--c-carved); }
+        .crest-weathered { color: var(--c-weathered); }
+
+        .footer { margin-top: auto; padding-top: 10px; border-top: 1px solid #333; text-align: center; color: #555; font-size: 0.75rem; width: 100%; flex-shrink: 0; }
+        .modal { display: none; position: fixed; z-index: 99; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
+        .modal-content { background: #333; margin: 15% auto; padding: 20px; border-radius: 10px; width: 300px; border: 2px solid var(--theme-color); text-align: center; }
+        .modal input, .modal select { width: 100%; padding: 10px; margin: 10px 0; background: #222; color: white; border: 1px solid #555; border-radius: 4px; }
+        
+        .settings-scroll { overflow-y: auto; margin-top: 5px; border: 1px solid #444; border-radius: 6px; }
+        .settings-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .settings-table th { text-align: left; padding: 8px; background: #26262b; position: sticky; top: 0; z-index: 2; color: #aaa; }
+        .settings-table td { padding: 6px; border-bottom: 1px solid #333; background: #2d2d33; }
+        .settings-table input, .settings-table select { background: #111; color: white; border: 1px solid #444; padding: 4px; width: 100%; border-radius: 3px; }
+        @media (max-width: 768px) { body { height: auto; overflow: auto; } .app-wrapper { flex-direction: column; } }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="profile-bar">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <strong style="color:#aaa;">CHARACTER:</strong>
+            <select id="profileSelect" class="profile-select" onchange="switchProfile(this.value)"></select>
+        </div>
+        <div>
+            <button class="btn-profile btn-new" onclick="openModal()">+ New</button>
+            <button class="btn-profile btn-del" onclick="deleteProfile()">Delete</button>
+        </div>
+    </div>
+
+    <div class="app-wrapper">
+        <div class="panel char-panel">
+            <div class="char-header">
+                <input type="text" class="char-input" id="charName" placeholder="Name" onchange="saveCharName()">
+                <div class="ilvl-display"><span class="ilvl-number" id="avgIlvl">0</span><span class="ilvl-label">Avg</span></div>
+            </div>
+            <div class="gear-scroll-container"><div class="gear-grid" id="gearGrid"></div></div>
+        </div>
+
+        <div class="panel tracker-panel">
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTab('dashboard')">Tracker</button>
+                <button class="tab-btn" onclick="switchTab('settings')">Config</button>
+            </div>
+
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="strategy-box">
+                    <label class="strategy-label">Farming Strategy</label>
+                    <select class="strategy-select" id="activeRunSelect" onchange="render()"></select>
+                    <div style="margin-top: 8px; font-size: 0.8rem; color: #ccc; display: flex; justify-content: space-between;">
+                        <span>Valor: <span id="infoValor" style="color:var(--accent-valor)">0</span></span>
+                        <span id="conversionDisplay" style="text-align: right; color: #aaa;"></span>
+                    </div>
+                </div>
+                <div style="text-align:center;">
+                    <div class="counter-display" id="runsRemaining">0</div>
+                    <div class="sub-text">Runs Remaining</div>
+                </div>
+                <button class="btn-add" onclick="updateRuns(1)">Run Complete (-1)</button>
+                <button class="btn-undo" onclick="updateRuns(-1)">Undo Mistake (+1)</button>
+                <div class="planner">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span class="planner-sub">TARGET DATE</span>
+                        <input type="date" style="background:#333; color:white; border:none; padding:4px; border-radius:4px; font-size:0.8rem;" id="targetDate" onchange="render()">
+                    </div>
+                    <div class="planner-grid">
+                        <div class="planner-item"><span class="planner-val" id="weeksLeft">0</span><span class="planner-sub">Weeks</span></div>
+                        <div class="planner-item"><span class="planner-val pace-val" id="runsPerWeek">0</span><span class="planner-sub">Per Week</span></div>
+                        <div class="planner-item"><span class="planner-val pace-val" id="runsPerDay">0</span><span class="planner-sub">Per Day</span></div>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-box valor-box">
+                        <span class="stat-label">Valor Goal</span>
+                        <input type="number" class="stat-input" id="valorGoalInput" value="3436" onchange="updateGoals()">
+                        <div class="stat-label" style="margin-top:2px;">Rem: <span id="valorReal">0</span></div>
+                        <div class="progress-container"><div class="progress-bar" id="valorBar" style="background: var(--accent-valor); width: 0%"></div></div>
+                    </div>
+                    <div class="stat-box crest-box">
+                        <span class="stat-label">Gilded Goal</span>
+                        <input type="number" class="stat-input" id="crestGoalInput" value="390" onchange="updateGoals()">
+                        <div class="stat-label" style="margin-top:2px;">Rem: <span id="crestReal">0</span></div>
+                        <div class="progress-container"><div class="progress-bar" id="crestBar" style="background: var(--accent-crests); width: 0%"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-settings" class="tab-content">
+                <div class="sub-nav">
+                    <button id="btn-cfg-delves" class="sub-btn active" onclick="switchConfigSub('delves')">Delves</button>
+                    <button id="btn-cfg-dungeons" class="sub-btn" onclick="switchConfigSub('dungeons')">Dungeons</button>
+                </div>
+
+                <div id="cfg-delves" class="cfg-container active">
+                    <div class="settings-scroll" style="flex:1;">
+                        <table class="settings-table">
+                            <thead><tr><th>Tier</th><th>Valor</th><th>Type</th><th>Amt</th></tr></thead>
+                            <tbody id="delveSettingsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="cfg-dungeons" class="cfg-container">
+                    <div class="settings-scroll" style="flex:1;">
+                        <table class="settings-table">
+                            <thead><tr><th>Key</th><th>Valor</th><th>Type</th><th>Amt</th></tr></thead>
+                            <tbody id="dungeonSettingsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <button class="btn-undo" style="width:100%; margin-top:15px; color:#d63031; border-color:#d63031; padding:10px;" onclick="resetDefaults()">Reset Config to Defaults</button>
+            </div>
+        </div>
+    </div>
+    <div class="footer"><strong>© 2026 Lil_ArtGhoul. All Rights Reserved.</strong><br>Patch 12.0.1 Readiness Tool</div>
+</div>
+
+<div id="newCharModal" class="modal">
+    <div class="modal-content">
+        <h3 style="color:var(--theme-color)">New Character</h3>
+        <input type="text" id="newCharName" placeholder="Name">
+        <select id="newCharClass">
+            <option value="DK">Death Knight</option><option value="DH">Demon Hunter</option><option value="Druid">Druid</option>
+            <option value="Evoker">Evoker</option><option value="Hunter">Hunter</option><option value="Mage">Mage</option>
+            <option value="Monk">Monk</option><option value="Paladin">Paladin</option><option value="Priest">Priest</option>
+            <option value="Rogue">Rogue</option><option value="Shaman">Shaman</option><option value="Warlock">Warlock</option>
+            <option value="Warrior">Warrior</option>
+        </select>
+        <button class="btn-profile btn-new" style="width:100%; margin-top:10px;" onclick="createProfile()">Create</button>
+        <button class="btn-undo" style="width:100%; margin-top:10px; border:none;" onclick="closeModal()">Cancel</button>
+    </div>
+</div>
+
+<script>
+   const _0x279660=_0x3a27;(function(_0x4f6fc8,_0x4e1412){const _0x556801=_0x3a27,_0x215e89=_0x4f6fc8();while(!![]){try{const _0x1b7e57=-parseInt(_0x556801(0x228))/0x1+-parseInt(_0x556801(0x217))/0x2+-parseInt(_0x556801(0x20b))/0x3*(-parseInt(_0x556801(0x1ea))/0x4)+parseInt(_0x556801(0x1c3))/0x5+parseInt(_0x556801(0x1dc))/0x6+-parseInt(_0x556801(0x1c9))/0x7+-parseInt(_0x556801(0x22d))/0x8*(-parseInt(_0x556801(0x1f4))/0x9);if(_0x1b7e57===_0x4e1412)break;else _0x215e89['push'](_0x215e89['shift']());}catch(_0x264d6e){_0x215e89['push'](_0x215e89['shift']());}}}(_0x1efa,0xcda0c));const SLOTS=[_0x279660(0x212),_0x279660(0x213),_0x279660(0x1fe),'Back',_0x279660(0x247),_0x279660(0x208),_0x279660(0x206),_0x279660(0x210),_0x279660(0x1dd),_0x279660(0x239),_0x279660(0x1d2),_0x279660(0x20c),'Trinket\x20A',_0x279660(0x1d7),_0x279660(0x1f1),'Off\x20Hand'],TIERS=['None',_0x279660(0x211),_0x279660(0x1f3),_0x279660(0x20d),_0x279660(0x21d),_0x279660(0x1ee)],LEVELS=[_0x279660(0x23b),'2/8',_0x279660(0x1db),'4/8','5/8',_0x279660(0x1b5),_0x279660(0x252),_0x279660(0x250)],ILVL_RANGES={'None':[0x0,0x0],'Veteran':[0x6c,0x83],'Champion':[0x79,0x90],'Hero':[0x86,0x9d],'Myth':[0x93,0xa0],'Crafted':[0x0,0x0]},CONVERSION={'Gilded':0x1,'Runed':0x1/0x3,'Carved':0x1/0x9,'Weathered':0x1/0x1b},DEFAULT_CONFIG={'delves':[{'id':'d1','name':_0x279660(0x1cc),'valor':0xf,'type':'Weathered','amt':0x2},{'id':'d4','name':_0x279660(0x1f2),'valor':0x1e,'type':_0x279660(0x227),'amt':0x2},{'id':'d6','name':_0x279660(0x202),'valor':0x28,'type':'Runed','amt':0x2},{'id':'d7','name':_0x279660(0x251),'valor':0x32,'type':_0x279660(0x204),'amt':0x4},{'id':'d8','name':_0x279660(0x23d),'valor':0x41,'type':'Runed','amt':0xf},{'id':_0x279660(0x1d8),'name':'Tier\x2011','valor':0x41,'type':'Gilded','amt':0x2}],'dungeons':[{'id':'m0','name':_0x279660(0x1cb),'valor':0x1e,'type':'Carved','amt':0xa},{'id':'m2','name':_0x279660(0x1f8),'valor':0x41,'type':'Carved','amt':0xc},{'id':'m4','name':_0x279660(0x232),'valor':0x41,'type':'Runed','amt':0xc},{'id':'m7','name':_0x279660(0x21b),'valor':0x41,'type':_0x279660(0x204),'amt':0xc},{'id':'m8','name':'Mythic\x20+8','valor':0x41,'type':'Runed','amt':0xc},{'id':'m9','name':_0x279660(0x24f),'valor':0x41,'type':'Gilded','amt':0xc},{'id':_0x279660(0x1d0),'name':'Mythic\x20+10','valor':0x41,'type':_0x279660(0x1eb),'amt':0xc}]};let profiles=[],activeProfileId=null,config=JSON[_0x279660(0x1df)](JSON[_0x279660(0x255)](DEFAULT_CONFIG));window['onload']=function(){const _0x16ff97=_0x279660;if(localStorage['getItem'](_0x16ff97(0x1d3)))config=JSON['parse'](localStorage[_0x16ff97(0x1e3)](_0x16ff97(0x1d3)));localStorage['getItem'](_0x16ff97(0x22f))?(profiles=JSON['parse'](localStorage[_0x16ff97(0x1e3)](_0x16ff97(0x22f))),profiles['forEach'](_0x5354a7=>{const _0x419cfd=_0x16ff97;if(!_0x5354a7[_0x419cfd(0x1bc)])_0x5354a7[_0x419cfd(0x1bc)]={};SLOTS[_0x419cfd(0x21c)](_0x19388b=>{const _0x23c696=_0x419cfd;if(!_0x5354a7[_0x23c696(0x1bc)][_0x19388b]||typeof _0x5354a7[_0x23c696(0x1bc)][_0x19388b]!==_0x23c696(0x258))_0x5354a7[_0x23c696(0x1bc)][_0x19388b]={'tier':_0x23c696(0x211),'level':'1/8','customIlvl':0x96};});})):(profiles=[{'id':Date[_0x16ff97(0x22e)](),'name':_0x16ff97(0x225),'class':'Void','gear':{},'runsDone':0x0,'valorGoal':0xd6c,'crestGoal':0x186,'activeRunId':'d8','targetDate':_0x16ff97(0x220)}],saveProfiles());activeProfileId=profiles[0x0]['id'];if(localStorage[_0x16ff97(0x1e3)](_0x16ff97(0x241)))activeProfileId=parseInt(localStorage['getItem'](_0x16ff97(0x241)));if(!profiles[_0x16ff97(0x248)](_0x21432f=>_0x21432f['id']===activeProfileId))activeProfileId=profiles[0x0]['id'];updateProfileSelect(),renderSettings(),populateDropdown(),loadProfile(activeProfileId);};function getActiveProfile(){const _0x1a50ae=_0x279660;return profiles[_0x1a50ae(0x248)](_0x31c84c=>_0x31c84c['id']===activeProfileId);}function saveProfiles(){const _0x2e18ed=_0x279660;localStorage['setItem'](_0x2e18ed(0x22f),JSON['stringify'](profiles)),localStorage[_0x2e18ed(0x229)]('dt_activeId',activeProfileId);}function switchProfile(_0x4f9d34){activeProfileId=parseInt(_0x4f9d34),saveProfiles(),loadProfile(activeProfileId);}function loadProfile(_0x4c28bb){const _0x4db355=_0x279660,_0x15b7f8=profiles['find'](_0x203756=>_0x203756['id']===_0x4c28bb);applyClassTheme(_0x15b7f8[_0x4db355(0x1ed)]),document['getElementById']('charName')['value']=_0x15b7f8[_0x4db355(0x207)],document[_0x4db355(0x1d4)](_0x4db355(0x24c))[_0x4db355(0x245)]=_0x15b7f8[_0x4db355(0x243)],document[_0x4db355(0x1d4)]('crestGoalInput')[_0x4db355(0x245)]=_0x15b7f8[_0x4db355(0x1bb)],document[_0x4db355(0x1d4)](_0x4db355(0x253))[_0x4db355(0x245)]=_0x15b7f8[_0x4db355(0x253)]||_0x4db355(0x220);const _0x1d45ed=document['getElementById'](_0x4db355(0x235));if(_0x15b7f8[_0x4db355(0x1da)])_0x1d45ed[_0x4db355(0x245)]=_0x15b7f8[_0x4db355(0x1da)];renderGearGrid(_0x15b7f8['gear']),calcAvgIlvl(),render();}function saveCharName(){const _0x5ef76c=_0x279660,_0xbcd89f=getActiveProfile();_0xbcd89f[_0x5ef76c(0x207)]=document[_0x5ef76c(0x1d4)](_0x5ef76c(0x219))[_0x5ef76c(0x245)],saveProfiles(),updateProfileSelect();}function updateProfileSelect(){const _0x246854=_0x279660,_0x2bb5db=document[_0x246854(0x1d4)]('profileSelect');_0x2bb5db[_0x246854(0x231)]='',profiles[_0x246854(0x21c)](_0x36eda7=>{const _0x2c1981=_0x246854,_0x4f6c18=document['createElement'](_0x2c1981(0x1fc));_0x4f6c18[_0x2c1981(0x245)]=_0x36eda7['id'],_0x4f6c18[_0x2c1981(0x233)]=_0x36eda7[_0x2c1981(0x207)]+'\x20('+_0x36eda7[_0x2c1981(0x1ed)]+')';if(_0x36eda7['id']===activeProfileId)_0x4f6c18[_0x2c1981(0x226)]=!![];_0x2bb5db[_0x2c1981(0x23e)](_0x4f6c18);});}function _0x1efa(){const _0x189f5b=['tab-','Tier\x208+','appendChild','active','innerText','dt_activeId','label','valorGoal','.tab-content','value','\x22\x20onchange=\x22updateConfig(\x27','Chest','find','style','.tab-btn','delveSettingsBody','valorGoalInput','optgroup','data-theme','Mythic\x20+9','8/8','Tier\x207','7/8','targetDate','crestReal','stringify','runsDone','\x22\x20onchange=\x22updateSlot(\x27','object','weeksLeft','</td>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<td><input\x20type=\x22number\x22\x20value=\x22','Void','conversionDisplay','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</select>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<select\x20class=\x22slot-select\x20level-select\x22\x20style=\x22','dungeons','\x27,\x20this,\x20\x27customIlvl\x27)\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22item-ilvl\x22>','6/8','newCharModal','New\x20Character','documentElement','btn-cfg-dungeons','display','crestGoal','gear','tier','None','setAttribute','toLowerCase','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</select>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20type=\x22number\x22\x20class=\x22crafted-input\x22\x20style=\x22','onclick','6203575YmyxvG','replace','\x27,\x20this,\x20\x27level\x27)\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','type','color','delves','2235520xNsmGl','\x20Gilded</span>','Mythic\x200','Tier\x201','display:block','newCharName','level','m10','filter','Ring\x20A','dt_config','getElementById','infoValor','.item-ilvl','Trinket\x20B','d11','</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<select\x20class=\x22slot-select\x20tier-select\x22\x20onchange=\x22updateSlot(\x27','activeRunId','3/8','7799940TbKthD','Legs','max','parse','\x27,\x20','removeAttribute','round','getItem','valor','amt','\x22\x20value=\x22','Reset\x20GLOBAL\x20settings\x20to\x20defaults?','crestBar','join','4nFiWTz','Gilded','valorReal','class','Crafted','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22slot-label\x22>','\x27,\x20this,\x20\x27tier\x27)\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','Main\x20Hand','Tier\x204','Champion','54VIfQFM','runsRemaining','toFixed','querySelectorAll','Mythic\x20+2','div','gear-slot','runsPerWeek','option','#00b894','Shoulders','</option>','<td\x20style=\x22color:var(--theme-color)\x22>','</span>\x20(≈\x20<span\x20class=\x22crest-gilded\x22>','Tier\x206','dashboard','Runed','ceil','Hands','name','Wrist','dungeonSettingsBody','push','966441bxQBwo','Ring\x20B','Hero','gearGrid','<option\x20value=\x22','Waist','Veteran','Head','Neck','cfg-dungeons','width','runsPerDay','2361276nctUFf','Drops\x20<span\x20class=\x22crest-','charName','btn-cfg-','Mythic\x20+7','forEach','Myth','display:none','cfg-','2026-03-02','crestGoalInput','classList',',\x20\x27valor\x27,\x20this.value)\x22></td>','customIlvl','Main\x20Character','selected','Carved','752976ZGLvHt','setItem','removeProperty','remove','Weathered','309832fHRLjx','now','dt_profiles','createElement','innerHTML','Mythic\x20+4','text','length','activeRunSelect','map','newCharClass','add','Feet','Mythic\x20Dungeons','1/8'];_0x1efa=function(){return _0x189f5b;};return _0x1efa();}function createProfile(){const _0x14edb6=_0x279660,_0x19d55a=document['getElementById'](_0x14edb6(0x1ce))['value']||_0x14edb6(0x1b7),_0x3e1168=document[_0x14edb6(0x1d4)](_0x14edb6(0x237))[_0x14edb6(0x245)],_0x4b7cbe={'id':Date[_0x14edb6(0x22e)](),'name':_0x19d55a,'class':_0x3e1168,'gear':{},'runsDone':0x0,'valorGoal':0xd6c,'crestGoal':0x186,'activeRunId':'d8','targetDate':_0x14edb6(0x220)};profiles[_0x14edb6(0x20a)](_0x4b7cbe),activeProfileId=_0x4b7cbe['id'],saveProfiles(),updateProfileSelect(),closeModal(),loadProfile(activeProfileId);}function _0x3a27(_0x72611f,_0xf66a38){_0x72611f=_0x72611f-0x1b4;const _0x1efac9=_0x1efa();let _0x3a2729=_0x1efac9[_0x72611f];return _0x3a2729;}function deleteProfile(){const _0x41194e=_0x279660;if(profiles[_0x41194e(0x234)]<=0x1){alert('Cannot\x20delete\x20the\x20last\x20profile.');return;}confirm('Delete\x20this\x20character?\x20This\x20cannot\x20be\x20undone.')&&(profiles=profiles[_0x41194e(0x1d1)](_0x3fdca7=>_0x3fdca7['id']!==activeProfileId),activeProfileId=profiles[0x0]['id'],saveProfiles(),updateProfileSelect(),loadProfile(activeProfileId));}function applyClassTheme(_0x539c14){const _0x6954ff=_0x279660;if(_0x539c14===_0x6954ff(0x25b))document[_0x6954ff(0x1b8)][_0x6954ff(0x1e1)](_0x6954ff(0x24e));else document[_0x6954ff(0x1b8)][_0x6954ff(0x1bf)](_0x6954ff(0x24e),_0x539c14);}function getIlvl(_0x242a05,_0x52cf2a){const _0x2b04c5=_0x279660;if(_0x242a05===_0x2b04c5(0x1be)||_0x242a05===_0x2b04c5(0x1ee))return 0x0;const _0x3a3ddf=ILVL_RANGES[_0x242a05]||[0x0,0x0];if(!_0x52cf2a)return _0x3a3ddf[0x0];const _0x264a4a=_0x52cf2a['split']('/'),_0x4fab81=_0x264a4a[_0x2b04c5(0x234)]>0x0?parseInt(_0x264a4a[0x0])-0x1:0x0,_0x5ba6f5=(_0x3a3ddf[0x1]-_0x3a3ddf[0x0])/0x7;return Math[_0x2b04c5(0x1e2)](_0x3a3ddf[0x0]+_0x5ba6f5*_0x4fab81);}function renderGearGrid(_0x464d46){const _0x474eec=_0x279660,_0x1eac2c=document['getElementById'](_0x474eec(0x20e));_0x1eac2c[_0x474eec(0x231)]='',SLOTS[_0x474eec(0x21c)](_0x1bff0e=>{const _0x10bc44=_0x474eec;let _0x491479=_0x464d46[_0x1bff0e]||{'tier':_0x10bc44(0x211),'level':'1/8','customIlvl':0x96};const _0x37071d=document['createElement'](_0x10bc44(0x1f9));_0x37071d['className']=_0x10bc44(0x1fa),_0x37071d[_0x10bc44(0x1bf)]('data-rarity',_0x491479[_0x10bc44(0x1bd)]);const _0x2a313c=_0x491479[_0x10bc44(0x1bd)]===_0x10bc44(0x1ee),_0x84e366=_0x491479[_0x10bc44(0x1bd)]===_0x10bc44(0x1be);let _0x70827b='-';if(_0x2a313c)_0x70827b=_0x491479[_0x10bc44(0x224)]||0x0;else{if(!_0x84e366)_0x70827b=getIlvl(_0x491479[_0x10bc44(0x1bd)],_0x491479[_0x10bc44(0x1cf)]);}_0x37071d[_0x10bc44(0x231)]=_0x10bc44(0x1ef)+_0x1bff0e+_0x10bc44(0x1d9)+_0x1bff0e+_0x10bc44(0x1f0)+TIERS['map'](_0x16d105=>'<option\x20value=\x22'+_0x16d105+'\x22\x20'+(_0x16d105===_0x491479[_0x10bc44(0x1bd)]?_0x10bc44(0x226):'')+'>'+_0x16d105+'</option>')[_0x10bc44(0x1e9)]('')+_0x10bc44(0x25d)+(_0x2a313c||_0x84e366?_0x10bc44(0x21e):_0x10bc44(0x1cd))+_0x10bc44(0x257)+_0x1bff0e+_0x10bc44(0x1c5)+LEVELS['map'](_0x2a5b2a=>_0x10bc44(0x20f)+_0x2a5b2a+'\x22\x20'+(_0x2a5b2a===_0x491479[_0x10bc44(0x1cf)]?'selected':'')+'>'+_0x2a5b2a+_0x10bc44(0x1ff))[_0x10bc44(0x1e9)]('')+_0x10bc44(0x1c1)+(_0x2a313c?_0x10bc44(0x1cd):'display:none')+_0x10bc44(0x1e6)+(_0x491479[_0x10bc44(0x224)]||0x96)+_0x10bc44(0x257)+_0x1bff0e+_0x10bc44(0x1b4)+_0x70827b+'</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20',_0x1eac2c[_0x10bc44(0x23e)](_0x37071d);});}function updateSlot(_0x40ce16,_0x3298b6,_0x159389){const _0x494cce=_0x279660,_0x7e30e0=getActiveProfile();if(!_0x7e30e0['gear'][_0x40ce16])_0x7e30e0['gear'][_0x40ce16]={'tier':'Veteran','level':_0x494cce(0x23b),'customIlvl':0x96};_0x7e30e0[_0x494cce(0x1bc)][_0x40ce16][_0x159389]=_0x3298b6[_0x494cce(0x245)],saveProfiles(),renderGearGrid(_0x7e30e0['gear']),calcAvgIlvl();}function calcAvgIlvl(){const _0x1c3979=_0x279660;let _0x26f93b=0x0,_0x3773da=0x0;document['querySelectorAll'](_0x1c3979(0x1d6))[_0x1c3979(0x21c)](_0x205a47=>{const _0x2ae0e1=_0x1c3979,_0x54194b=_0x205a47[_0x2ae0e1(0x240)];_0x54194b!=='-'&&(_0x26f93b+=parseInt(_0x54194b),_0x3773da++);}),document['getElementById']('avgIlvl')[_0x1c3979(0x240)]=_0x3773da>0x0?(_0x26f93b/_0x3773da)[_0x1c3979(0x1f6)](0x1):0x0;}function render(){const _0x36b390=_0x279660,_0x54bcf1=getActiveProfile();_0x54bcf1['activeRunId']=document[_0x36b390(0x1d4)](_0x36b390(0x235))[_0x36b390(0x245)],saveProfiles();let _0x4d8af5=config[_0x36b390(0x1c8)][_0x36b390(0x248)](_0x49fa78=>_0x49fa78['id']===_0x54bcf1['activeRunId']);if(!_0x4d8af5)_0x4d8af5=config[_0x36b390(0x25e)]['find'](_0x5602d5=>_0x5602d5['id']===_0x54bcf1[_0x36b390(0x1da)]);if(!_0x4d8af5)return;document[_0x36b390(0x1d4)](_0x36b390(0x1d5))[_0x36b390(0x240)]=_0x4d8af5['valor'];const _0x52fc17=CONVERSION[_0x4d8af5[_0x36b390(0x1c6)]],_0x43ac54=_0x4d8af5[_0x36b390(0x1e5)]*_0x52fc17,_0x37c2c6=document[_0x36b390(0x1d4)](_0x36b390(0x25c));if(_0x4d8af5[_0x36b390(0x1c6)]==='Gilded')_0x37c2c6['innerHTML']='Drops\x20<span\x20class=\x22crest-gilded\x22>'+_0x4d8af5[_0x36b390(0x1e5)]+_0x36b390(0x1ca);else{const _0x3f8398=_0x43ac54['toFixed'](0x2)[_0x36b390(0x1c4)](/[.,]00$/,'');_0x37c2c6[_0x36b390(0x231)]=_0x36b390(0x218)+_0x4d8af5[_0x36b390(0x1c6)][_0x36b390(0x1c0)]()+'\x22>'+_0x4d8af5['type']+'\x20'+_0x4d8af5['type']+_0x36b390(0x201)+_0x3f8398+'\x20Gilded</span>)';}const _0xf0791d=_0x4d8af5[_0x36b390(0x1e4)]||0x1869f,_0x2b3d77=_0x43ac54===0x0?0.0001:_0x43ac54,_0x4ac099=Math[_0x36b390(0x205)](_0x54bcf1[_0x36b390(0x243)]/_0xf0791d),_0x523222=Math[_0x36b390(0x205)](_0x54bcf1[_0x36b390(0x1bb)]/_0x2b3d77),_0x251ef4=Math[_0x36b390(0x1de)](_0x4ac099,_0x523222);let _0x256961=_0x251ef4-_0x54bcf1[_0x36b390(0x256)];if(_0x256961<0x0)_0x256961=0x0;document[_0x36b390(0x1d4)](_0x36b390(0x1f5))[_0x36b390(0x240)]=_0x256961;let _0x4c64ab=_0x54bcf1['valorGoal']-_0x54bcf1['runsDone']*_0xf0791d;if(_0x4c64ab<0x0)_0x4c64ab=0x0;document[_0x36b390(0x1d4)](_0x36b390(0x1ec))['innerText']=_0x4c64ab[_0x36b390(0x1f6)](0x0),document['getElementById']('valorBar')['style'][_0x36b390(0x215)]=(_0x54bcf1[_0x36b390(0x243)]-_0x4c64ab)/_0x54bcf1[_0x36b390(0x243)]*0x64+'%';let _0x2c2e81=_0x54bcf1[_0x36b390(0x1bb)]-_0x54bcf1[_0x36b390(0x256)]*_0x43ac54;if(_0x2c2e81<0x0)_0x2c2e81=0x0;document[_0x36b390(0x1d4)](_0x36b390(0x254))['innerText']=_0x2c2e81['toFixed'](0x0),document['getElementById'](_0x36b390(0x1e8))[_0x36b390(0x249)][_0x36b390(0x215)]=(_0x54bcf1[_0x36b390(0x1bb)]-_0x2c2e81)/_0x54bcf1['crestGoal']*0x64+'%';if(_0x256961===0x0)document[_0x36b390(0x1d4)](_0x36b390(0x1f5))[_0x36b390(0x249)]['color']=_0x36b390(0x1fd);else document[_0x36b390(0x1d4)]('runsRemaining')[_0x36b390(0x249)][_0x36b390(0x22a)](_0x36b390(0x1c7));calculateWeekly(_0x256961);}function calculateWeekly(_0x1d430c){const _0x33e1df=_0x279660,_0x55ea1d=getActiveProfile();_0x55ea1d[_0x33e1df(0x253)]=document['getElementById']('targetDate')[_0x33e1df(0x245)],saveProfiles();const _0x58865f=new Date(_0x55ea1d[_0x33e1df(0x253)])-new Date();let _0xb38757=_0x58865f/(0x3e8*0x3c*0x3c*0x18*0x7);if(_0xb38757<0x0)_0xb38757=0x0;const _0x3fafaf=Math[_0x33e1df(0x1de)](0.1,_0xb38757);document['getElementById'](_0x33e1df(0x259))['innerText']=_0xb38757[_0x33e1df(0x1f6)](0x1),document[_0x33e1df(0x1d4)](_0x33e1df(0x1fb))['innerText']=Math['ceil'](_0x1d430c/_0x3fafaf),document[_0x33e1df(0x1d4)](_0x33e1df(0x216))[_0x33e1df(0x240)]=(_0x1d430c/_0x3fafaf/0x7)[_0x33e1df(0x1f6)](0x1);}function updateRuns(_0x59e297){const _0x50cd4d=_0x279660,_0x3f7285=getActiveProfile();_0x3f7285[_0x50cd4d(0x256)]+=_0x59e297;if(_0x3f7285['runsDone']<0x0)_0x3f7285[_0x50cd4d(0x256)]=0x0;saveProfiles(),render();}function updateGoals(){const _0x512ceb=_0x279660,_0x47a38b=getActiveProfile();_0x47a38b['valorGoal']=parseInt(document['getElementById'](_0x512ceb(0x24c))[_0x512ceb(0x245)])||0x0,_0x47a38b[_0x512ceb(0x1bb)]=parseInt(document[_0x512ceb(0x1d4)](_0x512ceb(0x221))[_0x512ceb(0x245)])||0x0,saveProfiles(),render();}function renderSettings(){const _0x52232a=_0x279660,_0x35b273=document[_0x52232a(0x1d4)](_0x52232a(0x24b)),_0x1e680c=document[_0x52232a(0x1d4)](_0x52232a(0x209));_0x35b273[_0x52232a(0x231)]='',_0x1e680c[_0x52232a(0x231)]='';const _0x53a1ef=(_0x2eac0d,_0xf58910,_0x1a70d1)=>{const _0x22b499=_0x52232a,_0x4e3bf8=document[_0x22b499(0x230)]('tr');_0x4e3bf8[_0x22b499(0x231)]=_0x22b499(0x200)+_0x2eac0d[_0x22b499(0x207)]+_0x22b499(0x25a)+_0x2eac0d[_0x22b499(0x1e4)]+'\x22\x20onchange=\x22updateConfig(\x27'+_0xf58910+_0x22b499(0x1e0)+_0x1a70d1+_0x22b499(0x223);const _0x398344=[_0x22b499(0x1eb),_0x22b499(0x204),_0x22b499(0x227),_0x22b499(0x22c)];let _0x218a5d=_0x398344[_0x22b499(0x236)](_0x51ff7f=>_0x22b499(0x20f)+_0x51ff7f+'\x22\x20'+(_0x2eac0d[_0x22b499(0x1c6)]===_0x51ff7f?_0x22b499(0x226):'')+'>'+_0x51ff7f+_0x22b499(0x1ff))[_0x22b499(0x1e9)]('');return _0x4e3bf8['innerHTML']+='<td><select\x20onchange=\x22updateConfig(\x27'+_0xf58910+_0x22b499(0x1e0)+_0x1a70d1+',\x20\x27type\x27,\x20this.value)\x22>'+_0x218a5d+'</select></td>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<td><input\x20type=\x22number\x22\x20value=\x22'+_0x2eac0d[_0x22b499(0x1e5)]+_0x22b499(0x246)+_0xf58910+_0x22b499(0x1e0)+_0x1a70d1+',\x20\x27amt\x27,\x20this.value)\x22></td>',_0x4e3bf8;};config[_0x52232a(0x1c8)]['forEach']((_0x552cb9,_0x35e5ee)=>_0x35b273['appendChild'](_0x53a1ef(_0x552cb9,'delves',_0x35e5ee))),config[_0x52232a(0x25e)][_0x52232a(0x21c)]((_0x19da91,_0x54bcc1)=>_0x1e680c['appendChild'](_0x53a1ef(_0x19da91,_0x52232a(0x25e),_0x54bcc1)));}function updateConfig(_0x2373ba,_0x2e8284,_0x4b49ad,_0xe3371e){const _0x400b9a=_0x279660;if(_0x4b49ad===_0x400b9a(0x1e4)||_0x4b49ad==='amt')_0xe3371e=parseInt(_0xe3371e)||0x0;config[_0x2373ba][_0x2e8284][_0x4b49ad]=_0xe3371e,localStorage[_0x400b9a(0x229)](_0x400b9a(0x1d3),JSON[_0x400b9a(0x255)](config)),populateDropdown(),render();}function populateDropdown(){const _0xf4f7fb=_0x279660,_0x5615be=document[_0xf4f7fb(0x1d4)]('activeRunSelect'),_0x39cfc4=_0x5615be[_0xf4f7fb(0x245)];_0x5615be[_0xf4f7fb(0x231)]='';const _0x1557d8=(_0x50d629,_0x124d2b)=>{const _0x45fa8a=_0xf4f7fb,_0x188d6b=document[_0x45fa8a(0x230)](_0x45fa8a(0x24d));_0x188d6b[_0x45fa8a(0x242)]=_0x124d2b,_0x50d629[_0x45fa8a(0x21c)](_0x133f2c=>{const _0x88e964=_0x45fa8a,_0x440d5c=document[_0x88e964(0x230)](_0x88e964(0x1fc));_0x440d5c['value']=_0x133f2c['id'],_0x440d5c[_0x88e964(0x233)]=_0x133f2c[_0x88e964(0x207)],_0x188d6b[_0x88e964(0x23e)](_0x440d5c);}),_0x5615be['appendChild'](_0x188d6b);};_0x1557d8(config[_0xf4f7fb(0x1c8)],'Delves'),_0x1557d8(config[_0xf4f7fb(0x25e)],_0xf4f7fb(0x23a));if(_0x39cfc4)_0x5615be[_0xf4f7fb(0x245)]=_0x39cfc4;}function resetDefaults(){const _0x27409d=_0x279660;confirm(_0x27409d(0x1e7))&&(config=JSON[_0x27409d(0x1df)](JSON[_0x27409d(0x255)](DEFAULT_CONFIG)),localStorage[_0x27409d(0x229)](_0x27409d(0x1d3),JSON[_0x27409d(0x255)](config)),renderSettings(),populateDropdown(),render());}function switchTab(_0x2807ac){const _0x316c8e=_0x279660;document[_0x316c8e(0x1f7)](_0x316c8e(0x244))[_0x316c8e(0x21c)](_0x74f69=>_0x74f69[_0x316c8e(0x222)][_0x316c8e(0x22b)](_0x316c8e(0x23f))),document[_0x316c8e(0x1f7)](_0x316c8e(0x24a))[_0x316c8e(0x21c)](_0x3eb62c=>_0x3eb62c[_0x316c8e(0x222)][_0x316c8e(0x22b)](_0x316c8e(0x23f))),document['getElementById'](_0x316c8e(0x23c)+_0x2807ac)[_0x316c8e(0x222)][_0x316c8e(0x238)](_0x316c8e(0x23f));const _0x29b1a7=document['querySelectorAll'](_0x316c8e(0x24a));if(_0x2807ac===_0x316c8e(0x203))_0x29b1a7[0x0][_0x316c8e(0x222)][_0x316c8e(0x238)]('active');else _0x29b1a7[0x1]['classList'][_0x316c8e(0x238)](_0x316c8e(0x23f));}function switchConfigSub(_0x470021){const _0x4ba7b=_0x279660;document[_0x4ba7b(0x1d4)]('cfg-delves')[_0x4ba7b(0x222)]['remove'](_0x4ba7b(0x23f)),document[_0x4ba7b(0x1d4)](_0x4ba7b(0x214))['classList'][_0x4ba7b(0x22b)](_0x4ba7b(0x23f)),document['getElementById']('btn-cfg-delves')[_0x4ba7b(0x222)][_0x4ba7b(0x22b)]('active'),document[_0x4ba7b(0x1d4)](_0x4ba7b(0x1b9))[_0x4ba7b(0x222)][_0x4ba7b(0x22b)](_0x4ba7b(0x23f)),document[_0x4ba7b(0x1d4)](_0x4ba7b(0x21f)+_0x470021)[_0x4ba7b(0x222)][_0x4ba7b(0x238)]('active'),document[_0x4ba7b(0x1d4)](_0x4ba7b(0x21a)+_0x470021)['classList'][_0x4ba7b(0x238)](_0x4ba7b(0x23f));}function openModal(){const _0x19dcac=_0x279660;document[_0x19dcac(0x1d4)](_0x19dcac(0x1b6))[_0x19dcac(0x249)][_0x19dcac(0x1ba)]='block';}function closeModal(){const _0x2e6ba2=_0x279660;document[_0x2e6ba2(0x1d4)](_0x2e6ba2(0x1b6))[_0x2e6ba2(0x249)][_0x2e6ba2(0x1ba)]='none';}window[_0x279660(0x1c2)]=function(_0x3a7d24){const _0x5cf081=_0x279660;if(_0x3a7d24['target']==document[_0x5cf081(0x1d4)]('newCharModal'))closeModal();};
+</script>
+
+</body>
+</html>
