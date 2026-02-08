@@ -244,19 +244,27 @@
     const CONVERSION = { 'Gilded': 1, 'Runed': 1/3, 'Carved': 1/9, 'Weathered': 1/27 };
     
     // UPDATED CONFIG WITH TABBED DATA
-    const DEFAULT_CONFIG = {
+const DEFAULT_CONFIG = {
         delves: [
             { id: 'd1', name: 'Tier 1', valor: 15, type: 'Weathered', amt: 2 },
+            { id: 'd2', name: 'Tier 2', valor: 20, type: 'Weathered', amt: 4 },
+            { id: 'd3', name: 'Tier 3', valor: 25, type: 'Weathered', amt: 6 },
             { id: 'd4', name: 'Tier 4', valor: 30, type: 'Carved', amt: 2 },
+            { id: 'd5', name: 'Tier 5', valor: 35, type: 'Carved', amt: 4 },
             { id: 'd6', name: 'Tier 6', valor: 40, type: 'Runed', amt: 2 },
-            { id: 'd7', name: 'Tier 7', valor: 50, type: 'Runed', amt: 4 },
-            { id: 'd8', name: 'Tier 8+', valor: 65, type: 'Runed', amt: 15 },
-            { id: 'd11', name: 'Tier 11', valor: 65, type: 'Gilded', amt: 2 },
+            { id: 'd7', name: 'Tier 7', valor: 50, type: 'Gilded', amt: 4 },
+            { id: 'd8', name: 'Tier 8', valor: 65, type: 'Gilded', amt: 5 },
+            { id: 'd9', name: 'Tier 9', valor: 65, type: 'Runed', amt: 5 },
+            { id: 'd10', name: 'Tier 10', valor: 65, type: 'Runed', amt: 5 },
+            { id: 'd11', name: 'Tier 11', valor: 65, type: 'Runed', amt: 15 }
         ],
         dungeons: [
             { id: 'm0', name: 'Mythic 0', valor: 30, type: 'Carved', amt: 10 },
             { id: 'm2', name: 'Mythic +2', valor: 65, type: 'Carved', amt: 12 },
+            { id: 'm3', name: 'Mythic +3', valor: 65, type: 'Carved', amt: 12 },
             { id: 'm4', name: 'Mythic +4', valor: 65, type: 'Runed', amt: 12 },
+            { id: 'm5', name: 'Mythic +5', valor: 65, type: 'Runed', amt: 12 },
+            { id: 'm6', name: 'Mythic +6', valor: 65, type: 'Runed', amt: 12 },
             { id: 'm7', name: 'Mythic +7', valor: 65, type: 'Runed', amt: 12 },
             { id: 'm8', name: 'Mythic +8', valor: 65, type: 'Runed', amt: 12 },
             { id: 'm9', name: 'Mythic +9', valor: 65, type: 'Gilded', amt: 12 },
@@ -578,3 +586,4 @@
 
 </body>
 </html>
+
